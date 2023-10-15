@@ -2,16 +2,6 @@
 考虑点：
 * floatwin
 * win visible: partial?
-* hint/label
-  * char set: winnr -> a-z
-  * color
-  * drawer
-
-实现：
-* fullscreen floatwin
-* draw the skeleton
-* replaceable label
-  * 方块: 长宽
 ]]
 --
 
@@ -22,13 +12,14 @@ local bufmap = require("infra.keymap.buffer")
 local prefer = require("infra.prefer")
 local rifts = require("infra.rifts")
 
-local alphabet = require("winjump.alphabet")
+local alphabet = require("winjump.display_panes.alphabet")
+local jumpto = require("winjump.to")
 
 local api = vim.api
 
 local build_matrix
 do
-  ---@class WinInfo
+  ---@class winjump.WinInfo
   ---@field botline   integer @last complete displayed buffer line
   ---@field bufnr     integer @number of buffer in the window
   ---@field height    integer @window height (excluding winbar)
@@ -46,7 +37,7 @@ do
   ---@field winnr     integer @window number
   ---@field winrow    integer @topmost screen line of the window; "row" from |win_screenpos()|
 
-  ---@return fun(): WinInfo?
+  ---@return fun(): winjump.WinInfo?
   local function iter_tab_wi()
     local tabnr = vim.fn.tabpagenr()
     return fn.filter(function(wi) return wi.tabnr == tabnr end, vim.fn.getwininfo())
@@ -77,30 +68,8 @@ do
   end
 
   ---@param matrix string[][]
-  ---@param wi WinInfo
+  ---@param wi winjump.WinInfo
   local function draw_win(matrix, wi)
-    --todo: tabline, off-by-1
-    if false and wi.winrow ~= 1 then -- draw top border
-      local row = wi.winrow - 1
-      local top = assert(matrix[row])
-      local col_start = wi.wincol - 1
-      local col_stop = col_start + wi.width + wi.textoff
-      for col = col_start, col_stop do
-        top[col] = chars.horizon
-      end
-      --todo: vertex
-      --if col_start ~= 1 then top[col_start] = chars.vertex end
-    end
-    if false and wi.wincol ~= 1 then -- draw left border
-      local row_start = wi.winrow
-      local row_stop = row_start + wi.height
-      local col = wi.wincol - 1
-      for row = row_start, row_stop do
-        matrix[row][col] = chars.vertical
-      end
-      --todo: vertex
-      --if row_start ~= 1 then matrix[row_start][col] = chars.vertex end
-    end
     do -- draw letter
       local a = string.char(string.byte("a") + (wi.winnr - 1))
       local letter = alphabet.matrix(a)
@@ -143,10 +112,7 @@ return function()
     for i = string.byte("a"), string.byte("z") do
       bm.n(string.char(i), function()
         api.nvim_win_close(0, false)
-        local to_winnr = i - string.byte("a") + 1
-        local to_winid = vim.fn.win_getid(to_winnr)
-        if to_winid == 0 then return end
-        api.nvim_set_current_win(to_winid)
+        jumpto(i - string.byte("a") + 1)
       end)
     end
   end
