@@ -1,5 +1,8 @@
---todo: deal with floatwin, win visible: partial?
---todo: cursor position: keep where it is? hide?
+---design choices
+---* imperfect highlight due to winblend
+---* no cursor management
+---* stop working when a floatwin is being focused
+---* no jump to floatwins
 
 local Ephemeral = require("infra.Ephemeral")
 local fn = require("infra.fn")
@@ -34,33 +37,31 @@ do
   ---@field winrow    integer @topmost screen line of the window; "row" from |win_screenpos()|
 
   ---@return fun(): winjump.WinInfo?
-  local function iter_tab_wi()
+  local function iter_wi()
     local tabnr = vim.fn.tabpagenr()
-    return fn.filter(function(wi) return wi.tabnr == tabnr end, vim.fn.getwininfo())
+    return fn.filter(function(wi)
+      if wi.tabnr ~= tabnr then return false end
+      if api.nvim_win_get_config(wi.winid).relative ~= "" then return false end
+      return true
+    end, vim.fn.getwininfo())
   end
-
-  local chars = { vertical = "|", horizon = "-", vertex = "*", blank = " " }
 
   ---@return string[][]
   local function zero_matrix()
-    local zero = {}
+    local matrix = {}
 
-    --todo: laststatus={0,1,2,3}
-    --todo: tabline, statusline, cmdline
-    local rows = vim.go.lines
-    rows = rows - vim.go.cmdheight
-
+    local rows = vim.go.lines - vim.go.cmdheight
     local cols = vim.go.columns
 
     for row = 1, rows do
       local line = {}
       for col = 1, cols do
-        line[col] = chars.blank
+        line[col] = " "
       end
-      zero[row] = line
+      matrix[row] = line
     end
 
-    return zero
+    return matrix
   end
 
   ---@param matrix string[][]
@@ -84,7 +85,7 @@ do
   function build_matrix()
     local matrix = zero_matrix()
 
-    for wi in iter_tab_wi() do
+    for wi in iter_wi() do
       draw_win(matrix, wi)
     end
 
@@ -93,11 +94,12 @@ do
 end
 
 return function()
+  if api.nvim_win_get_config(0).relative ~= "" then return jelly.warn("refuse to continue when focusing a floatwin") end
+
   local bufnr
   do
-    local matrix = build_matrix()
     local lines = {}
-    for i, line in ipairs(matrix) do
+    for i, line in ipairs(build_matrix()) do
       lines[i] = table.concat(line, "")
     end
     bufnr = Ephemeral({ modifiable = true, handyclose = true }, lines)

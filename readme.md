@@ -8,8 +8,8 @@ some ways to jump between nvim windows
 
 
 ## status
-* usable
-* but there are some edge cases need to be addressed
+* it just works(tm)
+* it is feature-frozen
 
 
 ## prerequisites
