@@ -6,8 +6,9 @@ some ways to jump between nvim windows
 * jumping in 'tmux display-panes' way
 
 
-## status: far from usable
-* various edge cases are not addressed
+## status
+* usable
+* but there are some edge cases need to be addressed
 
 
 ## prerequisites
@@ -15,4 +16,10 @@ some ways to jump between nvim windows
 
 
 ## usage
-TBD
+that's how i use it
+```
+for i = 1, 9 do
+  m.n("<leader>" .. i, function() require("winjump").to(i) end)
+end
+m.n("<leader>0", function() require("winjump").display_panes() end)
+```
