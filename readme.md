@@ -23,3 +23,7 @@ for i = 1, 9 do
 end
 m.n("<leader>0", function() require("winjump").display_panes() end)
 ```
+
+
+## credits
+* all the fonts used in this plugin come from http://patorjk.com/software/taag/
