@@ -1,9 +1,5 @@
---[[
-考虑点：
-* floatwin
-* win visible: partial?
-]]
---
+--todo: deal with floatwin, win visible: partial?
+--todo: cursor position: keep where it is? hide?
 
 local Ephemeral = require("infra.Ephemeral")
 local fn = require("infra.fn")

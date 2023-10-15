@@ -1,5 +1,6 @@
 some ways to jump between nvim windows
 
+![](https://user-images.githubusercontent.com/6236829/275310774-bbfece58-d92c-4ec8-b077-3498ee96471a.jpg)
 
 ## features
 * jumping by given winnr
