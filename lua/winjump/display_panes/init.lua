@@ -6,6 +6,7 @@
 
 local Ephemeral = require("infra.Ephemeral")
 local fn = require("infra.fn")
+local highlighter = require("infra.highlighter")
 local jelly = require("infra.jellyfish")("winjump.display_panes", "debug")
 local bufmap = require("infra.keymap.buffer")
 local prefer = require("infra.prefer")
@@ -93,6 +94,17 @@ do
   end
 end
 
+local floatwin_ns
+do
+  floatwin_ns = api.nvim_create_namespace("infra.rifts")
+  local hi = highlighter(floatwin_ns)
+  if vim.go.background == "light" then
+    hi("NormalFloat", { fg = 9 })
+  else
+    hi("NormalFloat", { fg = 1 })
+  end
+end
+
 return function()
   if api.nvim_win_get_config(0).relative ~= "" then return jelly.warn("refuse to continue when focusing a floatwin") end
 
@@ -103,9 +115,7 @@ return function()
       lines[i] = table.concat(line, "")
     end
     bufnr = Ephemeral({ modifiable = true, handyclose = true }, lines)
-  end
 
-  do
     local bm = bufmap.wraps(bufnr)
     for i = string.byte("a"), string.byte("z") do
       bm.n(string.char(i), function()
@@ -116,7 +126,7 @@ return function()
   end
 
   do
-    local winid = rifts.open.fullscreen(bufnr, true, { relative = "editor" })
+    local winid = rifts.open.fullscreen(bufnr, true, { relative = "editor" }, { ns = floatwin_ns })
     local wo = prefer.win(winid)
     wo.list = false
     wo.winblend = 1

@@ -18,14 +18,12 @@ for char, str in pairs(raw) do
 end
 
 local size = {}
-do
-  for char, lines in pairs(matrix) do
-    local width = 0
-    for _, line in ipairs(lines) do
-      if #line > width then width = #line end
-    end
-    size[char] = { width = width, height = #lines }
+for char, lines in pairs(matrix) do
+  local width = 0
+  for _, line in ipairs(lines) do
+    if #line > width then width = #line end
   end
+  size[char] = { width = width, height = #lines }
 end
 
 ---@param letter string @letter
