@@ -1,10 +1,16 @@
-some ways to jump between nvim windows
+some ways to jump between nvim windows, which are to jump to a window:
+* by a given winnr
+* in 'tmux display-panes' way
 
 ![](https://user-images.githubusercontent.com/6236829/275310774-bbfece58-d92c-4ec8-b077-3498ee96471a.jpg)
 
-## features
-* jumping by given winnr
-* jumping in 'tmux display-panes' way
+
+## design choices / limits
+* incompatible with &termguicolors
+* accept the imperfect highlight of winblend
+* no cursor management: no hide, no move
+* stop working when a floatwin is being focused
+* no jump to a floatwin
 
 
 ## status
