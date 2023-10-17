@@ -96,7 +96,7 @@ end
 
 local floatwin_ns
 do
-  floatwin_ns = api.nvim_create_namespace("infra.rifts")
+  floatwin_ns = api.nvim_create_namespace("winjump.display_panes")
   local hi = highlighter(floatwin_ns)
   if vim.go.background == "light" then
     hi("NormalFloat", { fg = 9 })
