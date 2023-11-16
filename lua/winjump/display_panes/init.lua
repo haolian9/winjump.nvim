@@ -3,7 +3,10 @@
 ---* no cursor management
 ---* stop working when a floatwin is being focused
 ---* no jump to floatwins
+---* reuse the buffer, but not cache the filled buffer
+---    * as the caching seems not worth it to me
 
+local ctx = require("infra.ctx")
 local Ephemeral = require("infra.Ephemeral")
 local fn = require("infra.fn")
 local highlighter = require("infra.highlighter")
@@ -16,6 +19,8 @@ local alphabet = require("winjump.display_panes.alphabet")
 local jumpto = require("winjump.to")
 
 local api = vim.api
+
+local function is_floatwin(winid) return api.nvim_win_get_config(winid).relative ~= "" end
 
 local build_matrix
 do
@@ -42,7 +47,7 @@ do
     local tabnr = vim.fn.tabpagenr()
     return fn.filter(function(wi)
       if wi.tabnr ~= tabnr then return false end
-      if api.nvim_win_get_config(wi.winid).relative ~= "" then return false end
+      if is_floatwin(wi.winid) then return false end
       return true
     end, vim.fn.getwininfo())
   end
@@ -105,17 +110,13 @@ do
   end
 end
 
+local bufnr
+
 return function()
-  if api.nvim_win_get_config(0).relative ~= "" then return jelly.warn("refuse to continue when focusing a floatwin") end
+  if is_floatwin(0) then return jelly.warn("refuse to work when a floatwin is being focused") end
 
-  local bufnr
-  do
-    local lines = {}
-    for i, line in ipairs(build_matrix()) do
-      lines[i] = table.concat(line, "")
-    end
-    bufnr = Ephemeral({ modifiable = true, handyclose = true }, lines)
-
+  if not (bufnr ~= nil and api.nvim_buf_is_valid(bufnr)) then
+    bufnr = Ephemeral({ modifiable = false, handyclose = true, name = "winjump://display-panes" })
     local bm = bufmap.wraps(bufnr)
     for i = string.byte("a"), string.byte("z") do
       bm.n(string.char(i), function()
@@ -123,6 +124,16 @@ return function()
         jumpto(i - string.byte("a") + 1)
       end)
     end
+  end
+
+  do
+    local lines = {}
+    for i, line in ipairs(build_matrix()) do
+      lines[i] = table.concat(line, "")
+    end
+    ctx.noundo(bufnr, function()
+      ctx.modifiable(bufnr, function() api.nvim_buf_set_lines(bufnr, 0, -1, false, lines) end)
+    end)
   end
 
   do
