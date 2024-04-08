@@ -44,6 +44,10 @@ do
 
   ---@return fun(): winjump.WinInfo?
   local function iter_wi()
+    --it might or might not be more efficient to iterate wininfos by map(fn.getwininfo, tabpage_list_win())
+    --but who knows there wont be too many tabpages and windows in my daily use
+    --and vim.fn.* causes extra overhead on converting param/result between vimscript and lua interpreter.
+    --so whatever, it has not bitten me so far
     local tabnr = vim.fn.tabpagenr()
     return fn.filter(function(wi)
       if wi.tabnr ~= tabnr then return false end
@@ -56,7 +60,14 @@ do
   local function zero_matrix()
     local matrix = {}
 
-    local rows = vim.go.lines - vim.go.cmdheight
+    local rows
+    do
+      rows = vim.go.lines
+      rows = rows - vim.go.cmdheight
+      if vim.go.laststatus == 3 then rows = rows - 1 end
+      ---todo: may conflict with vim.ui.ext.cmdline
+    end
+
     local cols = vim.go.columns
 
     for row = 1, rows do
