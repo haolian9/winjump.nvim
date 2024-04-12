@@ -6,6 +6,7 @@
 ---* reuse the buffer, but not cache the filled buffer
 ---    * as the caching seems not worth it to me
 
+local buflines = require("infra.buflines")
 local ctx = require("infra.ctx")
 local Ephemeral = require("infra.Ephemeral")
 local fn = require("infra.fn")
@@ -143,7 +144,7 @@ return function()
       lines[i] = table.concat(line, "")
     end
     ctx.noundo(bufnr, function()
-      ctx.modifiable(bufnr, function() api.nvim_buf_set_lines(bufnr, 0, -1, false, lines) end)
+      ctx.modifiable(bufnr, function() buflines.replaces_all(bufnr, lines) end)
     end)
   end
 
