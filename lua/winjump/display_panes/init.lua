@@ -141,7 +141,7 @@ return function()
   do
     local lines = {}
     for i, line in ipairs(build_matrix()) do
-      lines[i] = table.concat(line, "")
+      lines[i] = table.concat(line)
     end
     ctx.noundo(bufnr, function()
       ctx.modifiable(bufnr, function() buflines.replaces_all(bufnr, lines) end)
