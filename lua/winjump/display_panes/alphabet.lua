@@ -3,13 +3,16 @@ local M = {}
 local fn = require("infra.fn")
 local utf8 = require("infra.utf8")
 
-local raw = (function()
-  local font = vim.go.background == "light" and "electronic" or "ansi_shadow"
-  return require(string.format("winjump.display_panes.fonts.%s", font))
+local g = require("winjump.g")
+
+local enum = (function()
+  ---it's been written like this because `mod = require(str.format())` is not supported by squirrel.sort_requires
+  local path = string.format("winjump.display_panes.fonts.%s", g.display_panes_font)
+  return require(path)
 end)()
 
 local matrix = {}
-for char, str in pairs(raw) do
+for char, str in pairs(enum) do
   local lines = {}
   for line in fn.split_iter(str, "\n") do
     table.insert(lines, fn.tolist(utf8.iterate(line)))
@@ -28,7 +31,7 @@ end
 
 ---@param letter string @letter
 ---@return string
-function M.raw(letter) return assert(raw[letter]) end
+function M.raw(letter) return assert(enum[letter]) end
 
 ---@param letter string @letter
 ---@return string[][]
