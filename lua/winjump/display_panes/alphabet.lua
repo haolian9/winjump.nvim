@@ -1,6 +1,7 @@
 local M = {}
 
-local fn = require("infra.fn")
+local itertools = require("infra.itertools")
+local strlib = require("infra.strlib")
 local utf8 = require("infra.utf8")
 
 local g = require("winjump.g")
@@ -14,8 +15,8 @@ end)()
 local matrix = {}
 for char, str in pairs(enum) do
   local lines = {}
-  for line in fn.split_iter(str, "\n") do
-    table.insert(lines, fn.tolist(utf8.iterate(line)))
+  for line in strlib.iter_splits(str, "\n") do
+    table.insert(lines, itertools.tolist(utf8.iterate(line)))
   end
   matrix[char] = lines
 end

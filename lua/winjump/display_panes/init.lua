@@ -7,9 +7,9 @@
 ---    * as the caching seems not worth it to me
 
 local buflines = require("infra.buflines")
+local itertools = require("infra.itertools")
 local ctx = require("infra.ctx")
 local Ephemeral = require("infra.Ephemeral")
-local fn = require("infra.fn")
 local highlighter = require("infra.highlighter")
 local jelly = require("infra.jellyfish")("winjump.display_panes", "debug")
 local bufmap = require("infra.keymap.buffer")
@@ -45,12 +45,12 @@ do
 
   ---@return fun(): winjump.WinInfo?
   local function iter_wi()
-    --it might or might not be more efficient to iterate wininfos by map(fn.getwininfo, tabpage_list_win())
+    --it might or might not be more efficient to iterate wininfos by map(itertools.getwininfo, tabpage_list_win())
     --but who knows there wont be too many tabpages and windows in my daily use
     --and vim.fn.* causes extra overhead on converting param/result between vimscript and lua interpreter.
     --so whatever, it has not bitten me so far
     local tabnr = vim.fn.tabpagenr()
-    return fn.filter(function(wi)
+    return itertools.filter(function(wi)
       if wi.tabnr ~= tabnr then return false end
       if is_floatwin(wi.winid) then return false end
       return true
