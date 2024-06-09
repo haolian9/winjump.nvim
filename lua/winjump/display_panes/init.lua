@@ -45,7 +45,7 @@ do
 
   ---@return fun(): winjump.WinInfo?
   local function iter_wi()
-    --it might or might not be more efficient to iterate wininfos by map(itertools.getwininfo, tabpage_list_win())
+    --it might or might not be more efficient to iterate wininfos by map(getwininfo, tabpage_list_win())
     --but who knows there wont be too many tabpages and windows in my daily use
     --and vim.fn.* causes extra overhead on converting param/result between vimscript and lua interpreter.
     --so whatever, it has not bitten me so far
