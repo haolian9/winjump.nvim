@@ -7,21 +7,20 @@
 ---    * as the caching seems not worth it to me
 
 local buflines = require("infra.buflines")
-local itertools = require("infra.itertools")
 local ctx = require("infra.ctx")
 local Ephemeral = require("infra.Ephemeral")
 local highlighter = require("infra.highlighter")
+local itertools = require("infra.itertools")
 local jelly = require("infra.jellyfish")("winjump.display_panes", "debug")
 local bufmap = require("infra.keymap.buffer")
+local ni = require("infra.ni")
 local prefer = require("infra.prefer")
 local rifts = require("infra.rifts")
 
 local alphabet = require("winjump.display_panes.alphabet")
 local jumpto = require("winjump.to")
 
-local api = vim.api
-
-local function is_floatwin(winid) return api.nvim_win_get_config(winid).relative ~= "" end
+local function is_floatwin(winid) return ni.win_get_config(winid).relative ~= "" end
 
 local build_matrix
 do
@@ -113,7 +112,7 @@ end
 
 local floatwin_ns
 do
-  floatwin_ns = api.nvim_create_namespace("winjump.display_panes")
+  floatwin_ns = ni.create_namespace("winjump.display_panes")
   local hi = highlighter(floatwin_ns)
   if vim.go.background == "light" then
     hi("NormalFloat", { fg = 9 })
@@ -127,12 +126,12 @@ local bufnr
 return function()
   if is_floatwin(0) then return jelly.warn("refuse to work when a floatwin is being focused") end
 
-  if not (bufnr ~= nil and api.nvim_buf_is_valid(bufnr)) then
+  if not (bufnr ~= nil and ni.buf_is_valid(bufnr)) then
     bufnr = Ephemeral({ modifiable = false, handyclose = true, name = "winjump://display-panes" })
     local bm = bufmap.wraps(bufnr)
     for i = string.byte("a"), string.byte("z") do
       bm.n(string.char(i), function()
-        api.nvim_win_close(0, false)
+        ni.win_close(0, false)
         jumpto(i - string.byte("a") + 1)
       end)
     end
