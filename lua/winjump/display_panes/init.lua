@@ -49,11 +49,11 @@ do
     --and vim.fn.* causes extra overhead on converting param/result between vimscript and lua interpreter.
     --so whatever, it has not bitten me so far
     local tabnr = vim.fn.tabpagenr()
-    return itertools.filter(function(wi)
+    return itertools.filter(vim.fn.getwininfo(), function(wi)
       if wi.tabnr ~= tabnr then return false end
       if is_floatwin(wi.winid) then return false end
       return true
-    end, vim.fn.getwininfo())
+    end)
   end
 
   ---@return string[][]
