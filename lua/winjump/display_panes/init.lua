@@ -13,14 +13,13 @@ local highlighter = require("infra.highlighter")
 local itertools = require("infra.itertools")
 local jelly = require("infra.jellyfish")("winjump.display_panes", "debug")
 local bufmap = require("infra.keymap.buffer")
+local mi = require("infra.mi")
 local ni = require("infra.ni")
 local prefer = require("infra.prefer")
 local rifts = require("infra.rifts")
 
 local alphabet = require("winjump.display_panes.alphabet")
 local jumpto = require("winjump.to")
-
-local function is_floatwin(winid) return ni.win_get_config(winid).relative ~= "" end
 
 local build_matrix
 do
@@ -51,7 +50,7 @@ do
     local tabnr = vim.fn.tabpagenr()
     return itertools.filter(vim.fn.getwininfo(), function(wi)
       if wi.tabnr ~= tabnr then return false end
-      if is_floatwin(wi.winid) then return false end
+      if mi.win_is_float(wi.winid) then return false end
       return true
     end)
   end
@@ -124,7 +123,7 @@ end
 local bufnr
 
 return function()
-  if is_floatwin(0) then return jelly.warn("refuse to work when a floatwin is being focused") end
+  if mi.win_is_float(0) then return jelly.warn("refuse to work when a floatwin is being focused") end
 
   if not (bufnr ~= nil and ni.buf_is_valid(bufnr)) then
     bufnr = Ephemeral({ modifiable = false, handyclose = true, name = "winjump://display-panes" })
