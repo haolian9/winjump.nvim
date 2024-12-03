@@ -18,8 +18,12 @@ local ni = require("infra.ni")
 local prefer = require("infra.prefer")
 local rifts = require("infra.rifts")
 
-local alphabet = require("winjump.display_panes.alphabet")
+local Alphabet = require("winjump.display_panes.Alphabet")
+local g = require("winjump.g")
 local jumpto = require("winjump.to")
+
+local alphabet = Alphabet(g.display_panes_font)
+local alphabet_fallback = Alphabet("fallback")
 
 local build_matrix
 do
@@ -83,17 +87,20 @@ do
   ---@param matrix string[][]
   ---@param wi winjump.WinInfo
   local function draw_win(matrix, wi)
-    do -- draw letter
-      local a = string.char(string.byte("a") + (wi.winnr - 1))
-      local letter = alphabet.matrix(a)
-      local size = alphabet.size(a)
-      local start_col = wi.wincol + math.floor((wi.width - size.width) / 2)
-      local start_row = wi.winrow + math.floor((wi.height - size.height) / 2)
-      for row, letter_line in ipairs(letter) do
-        local matrix_line = matrix[start_row + row - 1]
-        for col, char in ipairs(letter_line) do
-          matrix_line[start_col + col - 1] = char
-        end
+    local a = string.char(string.byte("a") + (wi.winnr - 1))
+    local letter = alphabet:matrix(a)
+    local size = alphabet:size(a)
+    if size.width > wi.width or size.height > wi.height then
+      letter = alphabet_fallback:matrix(a)
+      size = alphabet_fallback:size(a)
+    end
+
+    local start_col = wi.wincol + math.floor((wi.width - size.width) / 2)
+    local start_row = wi.winrow + math.floor((wi.height - size.height) / 2)
+    for row, letter_line in ipairs(letter) do
+      local matrix_line = matrix[start_row + row - 1]
+      for col, char in ipairs(letter_line) do
+        matrix_line[start_col + col - 1] = char
       end
     end
   end
